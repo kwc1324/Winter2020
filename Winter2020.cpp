@@ -3,11 +3,15 @@
 #include "Winter2020.h"
 #include <stdlib.h>
 #include <windows.h>
+#include <CommDlg.h> //	OPENFILENAME 안될 때 사용
+#include <iostream>
+using namespace std;
 
 #define FILE_MENU_NEW 1
 #define FILE_MENU_OPEN 2
 #define FILE_MENU_EXIT 3
 #define GENERATE_BUTTON 4
+#define OPEN_FILE_BUTTON 5
 
 HMENU hMenu;
 HWND hName, hAge, hOut;
@@ -21,9 +25,10 @@ void addControls(HWND hWnd)
 	CreateWindowW(L"static", L"Age :", WS_VISIBLE | WS_CHILD, 100, 95, 98, 22, hWnd, NULL, NULL, NULL);
 	hAge = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER , 150, 95, 98, 22, hWnd, NULL, NULL, NULL);
 	
-	CreateWindowW(L"Button", L"입력 완료", WS_VISIBLE | WS_CHILD | WS_BORDER, 125, 130, 98, 38, hWnd, (HMENU)GENERATE_BUTTON, NULL, NULL);
+	CreateWindowW(L"Button", L"입력", WS_VISIBLE | WS_CHILD | WS_BORDER, 125, 130, 98, 38, hWnd, (HMENU)GENERATE_BUTTON, NULL, NULL);
+	CreateWindowW(L"Button", L"파일 찾기", WS_VISIBLE | WS_CHILD | WS_BORDER, 235, 130, 98, 38, hWnd, (HMENU)OPEN_FILE_BUTTON, NULL, NULL);
 	
-	hOut = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER , 100, 200, 300, 200, hWnd, NULL, NULL, NULL);
+	hOut = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_MULTILINE | ES_AUTOVSCROLL , 100, 200, 300, 200, hWnd, NULL, NULL, NULL);
 
 
 }
@@ -72,7 +77,30 @@ void addPaint(HWND hWnd)
 	DeleteObject(h_font);
 	EndPaint(hWnd, &ps);
 	return;
+}
 
+// 파일 찾기 함수
+void open_file(HWND hWnd)
+{
+	OPENFILENAME ofn;
+	TCHAR file_name[100];
+
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = hWnd;
+	ofn.lpstrFile = file_name;
+	ofn.lpstrFile[0] = '\0';
+	ofn.nMaxFile = 100;
+	ofn.lpstrFilter = L"모든 파일(*.*)\0*.*\0";
+	ofn.nFilterIndex = 1;
+
+	if (GetOpenFileName(&ofn))
+	{
+		SetWindowText(hOut, ofn.lpstrFile); // 파일 경로 출력
+		MessageBox(NULL, ofn.lpstrFile, L"Open File", MB_OK); // 파일 찾음 메시지
+	}
+	
+	return;
 }
 
 // 메시지 처리 함수
@@ -87,6 +115,9 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 	case WM_COMMAND:
 		switch (wp)
 		{
+		case OPEN_FILE_BUTTON:
+			open_file(hWnd);
+			break;
 		case FILE_MENU_EXIT:
 			val = MessageBoxW(hWnd, L"정말 종료하시겠습니까?", L"Wait!",MB_ICONQUESTION | MB_OKCANCEL);
 			if (val == IDOK) DestroyWindow(hWnd);
@@ -156,7 +187,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int nCmdSho
 	RegisterClass(&wc); // wc 정보 기준으로 'Window class' 등록
 
 	// 윈도우 생성
-	HWND hWnd = CreateWindow(my_class_name, L"ㅋㅋ",
+	HWND hWnd = CreateWindow(my_class_name, L"회원 관리",
 		WS_OVERLAPPEDWINDOW, 550, 250, 500, 500, NULL, NULL, hInst, NULL);
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
