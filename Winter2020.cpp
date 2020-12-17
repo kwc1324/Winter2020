@@ -2,6 +2,9 @@
 #include "framework.h"
 #include "Winter2020.h"
 
+#define FILE_MENU_NEW 1
+#define FILE_MENU_OPEN 2
+#define FILE_MENU_EXIT 3
 
 HMENU hMenu;
 
@@ -9,7 +12,18 @@ HMENU hMenu;
 void addMenus(HWND hWnd)
 {
 	hMenu = CreateMenu(); // 메뉴를 만듦
-	AppendMenu(hMenu, MF_STRING, 1, L"File");
+	HMENU hFileMenu = CreateMenu();
+	HMENU hSubMenu = CreateMenu();
+
+	AppendMenu(hSubMenu, MF_STRING, NULL, L"SubMenu Item");
+
+	AppendMenu(hFileMenu, MF_STRING, FILE_MENU_NEW, L"New");
+	AppendMenu(hFileMenu, MF_POPUP, (UINT_PTR)hSubMenu, L"Open");
+	AppendMenu(hFileMenu, MF_SEPARATOR, NULL, NULL);
+	AppendMenu(hFileMenu, MF_STRING, FILE_MENU_EXIT, L"Exit");
+
+
+	AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hFileMenu, L"File");
 	AppendMenu(hMenu, MF_STRING, NULL, L"Help");
 	SetMenu(hWnd, hMenu);
 }
@@ -40,36 +54,31 @@ void addPaint(HWND hWnd)
 
 }
 
-// 닫는창 메시지 박스
-int addMessageBox(HWND hWnd) {
-	// 메시지박스 - return은 OK or CANCEL
-	int check = MessageBox(hWnd, L"프로그램을 종료하시겠습니까?"
-		, L"Panorama", MB_ICONQUESTION | MB_OKCANCEL);
-	if (IDCANCEL == check) return 1;
-		
-}
-
 // 메시지 처리 함수
 LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch (msg)
 	{
+
 	case  WM_PAINT:
 		addPaint(hWnd);
 		break;
 	case WM_COMMAND:
 		switch (wp)
 		{
-		case 1:
-			MessageBeep(MB_OK);
+		case FILE_MENU_EXIT:
+			DestroyWindow(hWnd);
+			break;
+		case FILE_MENU_NEW:
+			MessageBeep(MB_ICONINFORMATION);
 			break;
 		}
 		break;
 	case WM_CREATE:
 		addMenus(hWnd);
 		break;
-	case WM_CLOSE: // 닫는 창
-		if (addMessageBox(hWnd)) PostQuitMessage(0);
+	case WM_DESTROY: // 닫기
+		PostQuitMessage(0);
 		break;
 	default:
 		return DefWindowProc(hWnd, msg, wp, lp);
@@ -114,5 +123,5 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int nCmdSho
 		DispatchMessage(&msg);
 	}
 
-	return msg.wParam;
+	return 0;
 }
