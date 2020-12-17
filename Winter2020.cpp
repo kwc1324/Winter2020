@@ -29,11 +29,11 @@ void addControls(HWND hWnd)
 }
 
 // 메뉴
+void addMenus(HWND hWnd)
 {
 	
 	hMenu = CreateMenu(); // 메뉴를 만듦
-	HMENU hFileMenu = CreateMenu
-void addMenus(HWND hWnd)();
+	HMENU hFileMenu = CreateMenu();
 	HMENU hSubMenu = CreateMenu();
 
 	AppendMenu(hSubMenu, MF_STRING, NULL, L"SubMenu Item");
@@ -78,6 +78,7 @@ void addPaint(HWND hWnd)
 // 메시지 처리 함수
 LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
+	int val;
 	switch (msg)
 	{
 	case  WM_PAINT:
@@ -87,8 +88,9 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 		switch (wp)
 		{
 		case FILE_MENU_EXIT:
-			DestroyWindow(hWnd);
-			break;
+			val = MessageBoxW(hWnd, L"정말 종료하시겠습니까?", L"Wait!",MB_ICONQUESTION | MB_OKCANCEL);
+			if (val == IDOK) DestroyWindow(hWnd);
+			else if(val == IDCANCEL) break;
 		case FILE_MENU_NEW:
 			MessageBeep(MB_ICONINFORMATION); // 소리나게
 			break;
@@ -97,6 +99,18 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 			TCHAR name[30], age[10], out[50];
 			GetWindowText(hName, name, 30);
 			GetWindowText(hAge, age, 10);
+			if (_tcscmp(name, L"" )==0 ) // 이름 입력 안했을 때
+			{
+				MessageBoxW(hWnd, L"이름을 입력하시오.", L"정보", MB_OK | MB_ICONSTOP);
+				return 0;	// break는 입력하지만 return은 함수 전체를 수행하지 않아서
+							// 출력 안되게 할 수 있음
+			}
+			else if (_tcscmp(age, L"") == 0) // 나이 입력 안했을 때
+			{
+				MessageBoxW(hWnd, L"나이를 입력하시오.", L"정보", MB_OK | MB_ICONSTOP);
+				return 0;
+			}
+
 			// 유니코드라서 TCHAR
 			_tcscpy_s(out, 30, name);
 			_tcscat_s(out, L" is ");
@@ -146,6 +160,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int nCmdSho
 		WS_OVERLAPPEDWINDOW, 550, 250, 500, 500, NULL, NULL, hInst, NULL);
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
+
+	
 
 	// 프로그램에 전달된 메시지를 번역/실행
 	MSG msg;
