@@ -4,8 +4,7 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <CommDlg.h> //	OPENFILENAME 안될 때 사용
-#include <iostream>
-using namespace std;
+#include <stdio.h>
 
 #define FILE_MENU_NEW 1
 #define FILE_MENU_OPEN 2
@@ -69,13 +68,29 @@ void addPaint(HWND hWnd)
 	RECT r = { 10, 10, 480, 50 }; // 사각형 위치, 크기
 	FillRect(h_dc, &r, (HBRUSH)GetStockObject(DKGRAY_BRUSH)); // 사각형 채우기
 	// 사각형 맞춰서 문자열 쓰기
-	DrawText(h_dc, L"노인복지관 명단", 8, &r, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+	DrawText(h_dc, L"회원 관리 명단", 8, &r, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
 	SelectObject(h_dc, h_old_font); // 폰트 설정 끝
 
 	//SetTextColor(h_dc, RGB(0, 0, 0)); // 폰트 컬러
 	//TextOut(h_dc, 10, 80, L"안녕안녕", 4);
 	DeleteObject(h_font);
 	EndPaint(hWnd, &ps);
+	return;
+}
+
+// 파일 출력
+void displayFile(TCHAR* path)
+{
+	FILE *file;
+	file = _tfopen(path, L"rt");
+	
+	fseek(file, 0, SEEK_END);
+	int _sz = ftell(file);
+	rewind(file); // file 맨 앞 가리키게 함
+	TCHAR *data = new TCHAR(_sz+1);
+	fgetws(data, _sz, file);
+
+	SetWindowText(hOut, data);
 	return;
 }
 
@@ -99,8 +114,21 @@ void open_file(HWND hWnd)
 		SetWindowText(hOut, ofn.lpstrFile); // 파일 경로 출력
 		MessageBox(NULL, ofn.lpstrFile, L"Open File", MB_OK); // 파일 찾음 메시지
 	}
-	
+	displayFile(ofn.lpstrFile);
+
 	return;
+}
+
+// 파일 입력
+void InsertMemo(HWND hWnd, TCHAR *out)
+{
+	TCHAR c = '\n';
+	FILE* file;
+	file = _tfopen(L"회원 리스트.txt", L"a");
+	fseek(file, 0, SEEK_SET);
+	fputws(out, file);
+	fputwc(c, file);
+	fclose(file);
 }
 
 // 메시지 처리 함수
@@ -148,6 +176,7 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 			_tcscat_s(out, age);
 			_tcscat_s(out, L" years old.");
 
+			InsertMemo(hWnd, out);
 			SetWindowText(hOut, out);
 			break;
 		}
