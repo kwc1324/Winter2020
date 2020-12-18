@@ -5,6 +5,10 @@
 #include <windows.h>
 #include <CommDlg.h> //	OPENFILENAME 안될 때 사용
 #include <stdio.h>
+#include <vector>
+#include <string>
+#include <iostream>
+using namespace std;
 
 #define FILE_MENU_NEW 1
 #define FILE_MENU_OPEN 2
@@ -14,6 +18,18 @@
 
 HMENU hMenu;
 HWND hName, hAge, hOut;
+
+class Person
+{
+public:
+	TCHAR name[30];
+	TCHAR age[10];
+	Person(TCHAR s[], TCHAR a[]) {
+		_tcscpy(name, s);
+		_tcscpy(age, a);
+	}
+
+};
 
 // 버튼 및 Edit 컨트롤
 void addControls(HWND hWnd)
@@ -87,10 +103,11 @@ void displayFile(TCHAR* path)
 	fseek(file, 0, SEEK_END);
 	int _sz = ftell(file);
 	rewind(file); // file 맨 앞 가리키게 함
-	TCHAR *data = new TCHAR(_sz+1);
+	
+    TCHAR *data = new TCHAR(_sz+1);	
 	fgetws(data, _sz, file);
-
 	SetWindowText(hOut, data);
+	
 	return;
 }
 
@@ -120,13 +137,16 @@ void open_file(HWND hWnd)
 }
 
 // 파일 입력
-void InsertMemo(HWND hWnd, TCHAR *out)
+void InsertMemo(HWND hWnd, TCHAR *out, vector<Person> myVector)
 {
 	TCHAR c = '\n';
+	TCHAR d = ' ';
 	FILE* file;
 	file = _tfopen(L"회원 리스트.txt", L"a");
 	fseek(file, 0, SEEK_SET);
-	fputws(out, file);
+	fputws(myVector[0].name, file);
+	fputwc(d, file);
+	fputws(myVector[0].age, file);
 	fputwc(c, file);
 	fclose(file);
 }
@@ -134,6 +154,7 @@ void InsertMemo(HWND hWnd, TCHAR *out)
 // 메시지 처리 함수
 LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
+	vector<Person> myVector;
 	int val;
 	switch (msg)
 	{
@@ -154,10 +175,11 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 			MessageBeep(MB_ICONINFORMATION); // 소리나게
 			break;
 		case GENERATE_BUTTON:
-
-			TCHAR name[30], age[10], out[50];
+			
+			TCHAR name[30], age[10], out[100];
 			GetWindowText(hName, name, 30);
 			GetWindowText(hAge, age, 10);
+			myVector.push_back(Person(name, age));
 			if (_tcscmp(name, L"" )==0 ) // 이름 입력 안했을 때
 			{
 				MessageBoxW(hWnd, L"이름을 입력하시오.", L"정보", MB_OK | MB_ICONSTOP);
@@ -172,12 +194,10 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 			// 유니코드라서 TCHAR
 			_tcscpy_s(out, 30, name);
-			_tcscat_s(out, L" is ");
+			_tcscat_s(out, L", ");
 			_tcscat_s(out, age);
-			_tcscat_s(out, L" years old.");
-
-			InsertMemo(hWnd, out);
 			SetWindowText(hOut, out);
+			InsertMemo(hWnd, out, myVector);
 			break;
 		}
 		break;
