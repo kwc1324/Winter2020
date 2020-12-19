@@ -36,16 +36,16 @@ public:
 void addControls(HWND hWnd)
 {
 	CreateWindowW(L"static", L"Name :", WS_VISIBLE | WS_CHILD, 10, 60, 98, 22, hWnd, NULL, NULL, NULL);
-	hName = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER , 60, 60, 98, 22, hWnd, NULL, NULL, NULL);
-	
+	hName = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 60, 60, 98, 22, hWnd, NULL, NULL, NULL);
+
 	CreateWindowW(L"static", L"Age :", WS_VISIBLE | WS_CHILD, 10, 87, 98, 22, hWnd, NULL, NULL, NULL);
-	hAge = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER , 60, 87, 98, 22, hWnd, NULL, NULL, NULL);
-	
+	hAge = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 60, 87, 98, 22, hWnd, NULL, NULL, NULL);
+
 	CreateWindowW(L"Button", L"저장", WS_VISIBLE | WS_CHILD | WS_BORDER, 10, 120, 98, 38, hWnd, (HMENU)GENERATE_BUTTON, NULL, NULL);
 	CreateWindowW(L"Button", L"조회", WS_VISIBLE | WS_CHILD | WS_BORDER, 113, 120, 98, 38, hWnd, (HMENU)FIND_BUTTON, NULL, NULL);
 	CreateWindowW(L"Button", L"파일 찾기", WS_VISIBLE | WS_CHILD | WS_BORDER, 266, 120, 98, 38, hWnd, (HMENU)OPEN_FILE_BUTTON, NULL, NULL);
-	
-	hOut = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_MULTILINE | ES_AUTOVSCROLL , 100, 200, 300, 200, hWnd, NULL, NULL, NULL);
+
+	hOut = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_MULTILINE | ES_AUTOVSCROLL, 100, 200, 300, 200, hWnd, NULL, NULL, NULL);
 
 
 }
@@ -53,7 +53,7 @@ void addControls(HWND hWnd)
 // 메뉴
 void addMenus(HWND hWnd)
 {
-	
+
 	hMenu = CreateMenu(); // 메뉴를 만듦
 	HMENU hFileMenu = CreateMenu();
 	HMENU hSubMenu = CreateMenu();
@@ -99,17 +99,17 @@ void addPaint(HWND hWnd)
 // 파일 출력
 void displayFile(TCHAR* path)
 {
-	FILE *file;
+	FILE* file;
 	file = _tfopen(path, L"rt");
-	
+
 	fseek(file, 0, SEEK_END);
 	int _sz = ftell(file);
 	rewind(file); // file 맨 앞 가리키게 함
-	
-    TCHAR *data = new TCHAR(_sz+1);	
+
+	TCHAR* data = new TCHAR(_sz + 1);
 	fgetws(data, _sz, file);
 	SetWindowText(hOut, data);
-	
+
 	return;
 }
 
@@ -139,7 +139,7 @@ void open_file(HWND hWnd)
 }
 
 // 파일 입력
-void InsertMemo(HWND hWnd, TCHAR *out, vector<Person> myVector)
+void InsertMemo(HWND hWnd, TCHAR* out, vector<Person> myVector)
 {
 	TCHAR c = '\n';
 	TCHAR d = ',';
@@ -156,7 +156,7 @@ void InsertMemo(HWND hWnd, TCHAR *out, vector<Person> myVector)
 }
 
 // 정보 조회
-bool findInformation(HWND hWnd, TCHAR *find)
+bool findInformation(HWND hWnd, TCHAR* find)
 {
 
 	FILE* file;
@@ -166,13 +166,30 @@ bool findInformation(HWND hWnd, TCHAR *find)
 	int _sz = ftell(file);
 	rewind(file); // file 맨 앞 가리키게 함
 
+	return true;
+}
 
+// txt파일 class 구성 함수
+void setClass(vector<Person> myVector)
+{
+	FILE* file;
+	file = _tfopen(L"회원 리스트.txt", L"rt");
+	
+	while (1)
+	{
+		TCHAR* tempName = new TCHAR(100);
+		TCHAR* tempAge = new TCHAR(10);
+		bool pass = false;
+		
+	}
 }
 
 // 메시지 처리 함수
 LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	vector<Person> myVector;
+	// txt파일 내용으로 class 구성
+	setClass(myVector);
 	int val;
 	switch (msg)
 	{
@@ -186,19 +203,19 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 			open_file(hWnd);
 			break;
 		case FILE_MENU_EXIT:
-			val = MessageBoxW(hWnd, L"정말 종료하시겠습니까?", L"Wait!",MB_ICONQUESTION | MB_OKCANCEL);
+			val = MessageBoxW(hWnd, L"정말 종료하시겠습니까?", L"Wait!", MB_ICONQUESTION | MB_OKCANCEL);
 			if (val == IDOK) DestroyWindow(hWnd);
-			else if(val == IDCANCEL) break;
+			else if (val == IDCANCEL) break;
 		case FILE_MENU_NEW:
 			MessageBeep(MB_ICONINFORMATION); // 소리나게
 			break;
 		case GENERATE_BUTTON:
-			
+
 			TCHAR name[30], age[10], out[100];
 			GetWindowText(hName, name, 30);
 			GetWindowText(hAge, age, 10);
 			myVector.push_back(Person(name, age));
-			if (_tcscmp(name, L"" )==0 ) // 이름 입력 안했을 때
+			if (_tcscmp(name, L"") == 0) // 이름 입력 안했을 때
 			{
 				MessageBoxW(hWnd, L"이름을 입력하시오.", L"정보", MB_OK | MB_ICONSTOP);
 				return 0;	// break는 입력하지만 return은 함수 전체를 수행하지 않아서
@@ -238,6 +255,8 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 }
 
 
+
+
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int nCmdShow)
 {
 
@@ -264,7 +283,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int nCmdSho
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 
-	
 
 	// 프로그램에 전달된 메시지를 번역/실행
 	MSG msg;
@@ -275,6 +293,5 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int nCmdSho
 		// WndProc함수 호출
 		DispatchMessage(&msg);
 	}
-
 	return 0;
 }
