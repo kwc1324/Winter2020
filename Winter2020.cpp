@@ -15,6 +15,7 @@ using namespace std;
 #define FILE_MENU_EXIT 3
 #define GENERATE_BUTTON 4
 #define OPEN_FILE_BUTTON 5
+#define FIND_BUTTON 6
 
 HMENU hMenu;
 HWND hName, hAge, hOut;
@@ -34,14 +35,15 @@ public:
 // 버튼 및 Edit 컨트롤
 void addControls(HWND hWnd)
 {
-	CreateWindowW(L"static", L"Name :", WS_VISIBLE | WS_CHILD, 100, 55, 98, 22, hWnd, NULL, NULL, NULL);
-	hName = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER , 150, 55, 98, 22, hWnd, NULL, NULL, NULL);
+	CreateWindowW(L"static", L"Name :", WS_VISIBLE | WS_CHILD, 10, 60, 98, 22, hWnd, NULL, NULL, NULL);
+	hName = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER , 60, 60, 98, 22, hWnd, NULL, NULL, NULL);
 	
-	CreateWindowW(L"static", L"Age :", WS_VISIBLE | WS_CHILD, 100, 95, 98, 22, hWnd, NULL, NULL, NULL);
-	hAge = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER , 150, 95, 98, 22, hWnd, NULL, NULL, NULL);
+	CreateWindowW(L"static", L"Age :", WS_VISIBLE | WS_CHILD, 10, 87, 98, 22, hWnd, NULL, NULL, NULL);
+	hAge = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER , 60, 87, 98, 22, hWnd, NULL, NULL, NULL);
 	
-	CreateWindowW(L"Button", L"입력", WS_VISIBLE | WS_CHILD | WS_BORDER, 125, 130, 98, 38, hWnd, (HMENU)GENERATE_BUTTON, NULL, NULL);
-	CreateWindowW(L"Button", L"파일 찾기", WS_VISIBLE | WS_CHILD | WS_BORDER, 235, 130, 98, 38, hWnd, (HMENU)OPEN_FILE_BUTTON, NULL, NULL);
+	CreateWindowW(L"Button", L"저장", WS_VISIBLE | WS_CHILD | WS_BORDER, 10, 120, 98, 38, hWnd, (HMENU)GENERATE_BUTTON, NULL, NULL);
+	CreateWindowW(L"Button", L"조회", WS_VISIBLE | WS_CHILD | WS_BORDER, 113, 120, 98, 38, hWnd, (HMENU)FIND_BUTTON, NULL, NULL);
+	CreateWindowW(L"Button", L"파일 찾기", WS_VISIBLE | WS_CHILD | WS_BORDER, 266, 120, 98, 38, hWnd, (HMENU)OPEN_FILE_BUTTON, NULL, NULL);
 	
 	hOut = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_MULTILINE | ES_AUTOVSCROLL , 100, 200, 300, 200, hWnd, NULL, NULL, NULL);
 
@@ -140,7 +142,7 @@ void open_file(HWND hWnd)
 void InsertMemo(HWND hWnd, TCHAR *out, vector<Person> myVector)
 {
 	TCHAR c = '\n';
-	TCHAR d = ' ';
+	TCHAR d = ',';
 	FILE* file;
 	file = _tfopen(L"회원 리스트.txt", L"a");
 	fseek(file, 0, SEEK_SET);
@@ -149,6 +151,22 @@ void InsertMemo(HWND hWnd, TCHAR *out, vector<Person> myVector)
 	fputws(myVector[0].age, file);
 	fputwc(c, file);
 	fclose(file);
+
+	return;
+}
+
+// 정보 조회
+bool findInformation(HWND hWnd, TCHAR *find)
+{
+
+	FILE* file;
+	file = _tfopen(L"회원 리스트.txt", L"rt");
+
+	fseek(file, 0, SEEK_END);
+	int _sz = ftell(file);
+	rewind(file); // file 맨 앞 가리키게 함
+
+
 }
 
 // 메시지 처리 함수
@@ -198,6 +216,11 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 			_tcscat_s(out, age);
 			SetWindowText(hOut, out);
 			InsertMemo(hWnd, out, myVector);
+			break;
+		case FIND_BUTTON:
+			TCHAR find[1000];
+			findInformation(hWnd, find);
+			SetWindowText(hOut, find);
 			break;
 		}
 		break;
