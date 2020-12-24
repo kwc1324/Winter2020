@@ -8,8 +8,10 @@
 #include <vector>
 #include <string>
 #include <iostream>
+
 using namespace std;
 
+#define _CRT_SECURE_NO_WARNINGS
 #define FILE_MENU_NEW 1
 #define FILE_MENU_OPEN 2
 #define FILE_MENU_EXIT 3
@@ -26,8 +28,8 @@ public:
 	TCHAR name[30];
 	TCHAR age[10];
 	Person(TCHAR s[], TCHAR a[]) {
-		_tcscpy(name, s);
-		_tcscpy(age, a);
+		wcscpy_s(name, s);
+		wcscpy_s(age, a);
 	}
 
 };
@@ -97,7 +99,7 @@ void addPaint(HWND hWnd)
 }
 
 // 파일 출력
-void displayFile(TCHAR* path)
+/*void displayFile(TCHAR* path)
 {
 	FILE* file;
 	file = _tfopen(path, L"rt");
@@ -111,10 +113,10 @@ void displayFile(TCHAR* path)
 	SetWindowText(hOut, data);
 
 	return;
-}
+}*/
 
 // 파일 찾기 함수
-void open_file(HWND hWnd)
+/*void open_file(HWND hWnd)
 {
 	OPENFILENAME ofn;
 	TCHAR file_name[100];
@@ -136,10 +138,10 @@ void open_file(HWND hWnd)
 	displayFile(ofn.lpstrFile);
 
 	return;
-}
+}*/
 
 // 파일 입력
-void InsertMemo(HWND hWnd, TCHAR* out, vector<Person> myVector)
+/*void InsertMemo(HWND hWnd, TCHAR* out, vector<Person>& myVector)
 {
 	TCHAR c = '\n';
 	TCHAR d = ',';
@@ -151,45 +153,48 @@ void InsertMemo(HWND hWnd, TCHAR* out, vector<Person> myVector)
 	fputws(myVector[0].age, file);
 	fputwc(c, file);
 	fclose(file);
-
 	return;
-}
+}*/
 
 // 정보 조회
-bool findInformation(HWND hWnd, TCHAR* find)
+void findInformation(HWND hWnd, vector<Person>& myVector)
 {
-
-	FILE* file;
-	file = _tfopen(L"회원 리스트.txt", L"rt");
-
-	fseek(file, 0, SEEK_END);
-	int _sz = ftell(file);
-	rewind(file); // file 맨 앞 가리키게 함
-
-	return true;
+	TCHAR _name[30], _age[10], _out[40];
+	GetWindowText(hName, _name, 30);
+	GetWindowText(hAge, _age, 10);
+	for (auto& e : myVector)
+	{
+		if (_tcscmp(e.name, _name) == 0)
+		{
+			_tcscpy_s(_out, 30, _name);
+			_tcscat_s(_out, L" ");
+			_tcscat_s(_out, _age);
+			SetWindowText(hOut, _out);
+		}
+	}
 }
 
 // txt파일 class 구성 함수
-void setClass(vector<Person> myVector)
-{
-	FILE* file;
-	file = _tfopen(L"회원 리스트.txt", L"rt");
-	
-	while (1)
-	{
-		TCHAR* tempName = new TCHAR(100);
-		TCHAR* tempAge = new TCHAR(10);
-		bool pass = false;
-		
-	}
-}
+//void setClass(vector<Person>& myVector)
+//{
+//	FILE* file;
+//	file = _tfopen(L"회원 리스트.txt", L"rt");
+//
+//	while (1)
+//	{
+//		TCHAR* tempName = new TCHAR(100);
+//		TCHAR* tempAge = new TCHAR(10);
+//		bool pass = false;
+//
+//	}
+//}
 
 // 메시지 처리 함수
 LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	vector<Person> myVector;
 	// txt파일 내용으로 class 구성
-	setClass(myVector);
+	//setClass(myVector);
 	int val;
 	switch (msg)
 	{
@@ -200,7 +205,7 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 		switch (wp)
 		{
 		case OPEN_FILE_BUTTON:
-			open_file(hWnd);
+			//open_file(hWnd);
 			break;
 		case FILE_MENU_EXIT:
 			val = MessageBoxW(hWnd, L"정말 종료하시겠습니까?", L"Wait!", MB_ICONQUESTION | MB_OKCANCEL);
@@ -232,12 +237,11 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 			_tcscat_s(out, L", ");
 			_tcscat_s(out, age);
 			SetWindowText(hOut, out);
-			InsertMemo(hWnd, out, myVector);
+			//InsertMemo(hWnd, out, myVector);
 			break;
 		case FIND_BUTTON:
-			TCHAR find[1000];
-			findInformation(hWnd, find);
-			SetWindowText(hOut, find);
+			findInformation(hWnd, myVector);
+			
 			break;
 		}
 		break;
